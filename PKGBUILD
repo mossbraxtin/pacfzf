@@ -13,7 +13,7 @@ optdepends=(
 )
 makedepends=('scdoc')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
-b2sums=('SKIP')
+b2sums=('6e094fe9a69708460244a4534f2976fa7ebe1d0bc090ac534037271124f8103d8e4bc75b71124c93975df6c34a0297f77f34767fbc21f29a3c1cd8c13ffe18fc')
 
 build() {
 cd "$pkgname-$pkgver"
