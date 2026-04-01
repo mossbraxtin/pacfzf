@@ -120,7 +120,23 @@ echo "✓ Checksums updated"
 git add PKGBUILD .SRCINFO
 git commit -m "chore: update checksums for v$NEW_VER"
 git push "$GH_REMOTE" main
-git push "$AUR_REMOTE" main:master
+
+# AUR only allows a flat repo (no subdirectories). Use a temporary worktree
+# that contains only PKGBUILD and .SRCINFO, then push that to AUR.
+AUR_WORK=$(mktemp -d /tmp/pacfzf-aur.XXXXXX)
+trap "rm -rf $TARBALL_TMP $AUR_WORK" EXIT
+
+git worktree add --detach "$AUR_WORK"
+cd "$AUR_WORK"
+git checkout --orphan aur-push
+git reset
+cp "$REPO_DIR/PKGBUILD" .
+cp "$REPO_DIR/.SRCINFO" .
+git add PKGBUILD .SRCINFO
+git commit -m "chore: update checksums for v$NEW_VER"
+git push "$AUR_REMOTE" HEAD:master --force
+cd "$REPO_DIR"
+git worktree remove --force "$AUR_WORK"
 
 echo ""
 echo "✓ Release v$NEW_VER complete — pushed to GitHub and AUR"
