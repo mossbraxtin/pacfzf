@@ -66,8 +66,10 @@ Any helper compatible with standard yay/paru flags works (e.g. `yay`, `paru`, `t
 
 - `fzf`
 - `pacman`
-- `yay` (queries and AUR browsing)
-- `paru` (AUR installs and removes)
+- `yay` — default `AUR_QUERY_HELPER` (listing and previews)
+- `paru` — default `AUR_INSTALL_HELPER` (AUR installs and removes)
+
+Both yay and paru can be swapped out via the [config file](#configuration).
 
 ## Installation
 

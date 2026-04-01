@@ -27,16 +27,14 @@ and the AUR.
 	Removes selected packages with *sudo pacman -Rns --noconfirm*.
 
 *aur-install*
-	Browse all available AUR packages via *AUR_QUERY_HELPER -Slqa*.
-	Preview shows *AUR_QUERY_HELPER -Siia* output.
-	Press *ALT-B* to toggle the PKGBUILD preview.
-	Installs selected packages with *AUR_INSTALL_HELPER -S --noconfirm*.
+	Browse all available AUR packages using the configured query helper.
+	Preview shows package info. Press *ALT-B* to toggle the PKGBUILD preview.
+	Installs selected packages using the configured install helper.
 
 *aur-remove*
 	Browse all installed foreign (AUR) packages.
-	Preview shows *AUR_QUERY_HELPER -Qi* output.
-	Press *ALT-B* to toggle the PKGBUILD preview.
-	Removes selected packages with *AUR_INSTALL_HELPER -Rns --noconfirm*.
+	Preview shows package info. Press *ALT-B* to toggle the PKGBUILD preview.
+	Removes selected packages using the configured install helper.
 
 *info*
 	Browse all installed packages and inspect them interactively.
@@ -106,7 +104,10 @@ The following key bindings apply across all commands:
 
 # DEPENDENCIES
 
-*fzf*(1), *pacman*(8), *yay*(8), *paru*(8)
+*fzf*(1), *pacman*(8)
+
+*yay*(8) and *paru*(8) are the default AUR helpers. These can be overridden
+via *AUR_QUERY_HELPER* and *AUR_INSTALL_HELPER* in the config file.
 
 # EXAMPLES
 

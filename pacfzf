@@ -40,10 +40,18 @@ Key bindings (all commands):
   ALT-D / ALT-U   Scroll preview down/up (half page)
   ALT-J / ALT-K   Scroll preview line by line
 
+Configuration:
+  ~/.config/pacfzf/config   Shell config file sourced at startup
+  AUR_QUERY_HELPER          AUR helper for listing/previews (default: yay)
+  AUR_INSTALL_HELPER        AUR helper for install/remove   (default: paru)
+
 Examples:
   pacfzf install
-  pacfzf aur-install
   pacfzf remove
+  pacfzf aur-install
+  pacfzf aur-remove
+  pacfzf info
+  pacfzf history
 
 See pacfzf(1) for full documentation.
 EOF
