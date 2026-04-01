@@ -27,16 +27,16 @@ and the AUR.
 	Removes selected packages with *sudo pacman -Rns --noconfirm*.
 
 *aur-install*
-	Browse all available AUR packages via *yay -Slqa*.
-	Preview shows *yay -Siia* output.
+	Browse all available AUR packages via *AUR_QUERY_HELPER -Slqa*.
+	Preview shows *AUR_QUERY_HELPER -Siia* output.
 	Press *ALT-B* to toggle the PKGBUILD preview.
-	Installs selected packages with *paru -S --noconfirm*.
+	Installs selected packages with *AUR_INSTALL_HELPER -S --noconfirm*.
 
 *aur-remove*
 	Browse all installed foreign (AUR) packages.
-	Preview shows *yay -Qi* output.
+	Preview shows *AUR_QUERY_HELPER -Qi* output.
 	Press *ALT-B* to toggle the PKGBUILD preview.
-	Removes selected packages with *paru -Rns --noconfirm*.
+	Removes selected packages with *AUR_INSTALL_HELPER -Rns --noconfirm*.
 
 *info*
 	Browse all installed packages and inspect them interactively.
@@ -48,6 +48,28 @@ and the AUR.
 	Browse the pacman transaction log in reverse chronological order.
 	Shows all *installed*, *removed*, and *upgraded* events from
 	*/var/log/pacman.log*. Fully fuzzy-searchable.
+
+# CONFIGURATION
+
+pacfzf reads *$XDG_CONFIG_HOME/pacfzf/config* (default:
+*~/.config/pacfzf/config*) on startup. The file is sourced as a shell script.
+
+Available variables:
+
+[[ AUR_QUERY_HELPER
+:< AUR helper used for package listing and previews. Default: *yay*
+|[ AUR_INSTALL_HELPER
+:< AUR helper used for installing and removing packages. Default: *paru*
+
+Example config:
+
+```
+AUR_QUERY_HELPER=paru
+AUR_INSTALL_HELPER=paru
+```
+
+Any AUR helper that supports the standard *yay*/*paru* flags (*-Slqa*, *-Siia*,
+*-Gpa*, *-S*, *-Rns*) is compatible.
 
 # OPTIONS
 

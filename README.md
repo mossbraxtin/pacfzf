@@ -44,6 +44,24 @@ Options:
 | `ALT-D / ALT-U` | Scroll preview down/up (half page) |
 | `ALT-J / ALT-K` | Scroll preview line by line |
 
+## Configuration
+
+pacfzf reads `~/.config/pacfzf/config` on startup (respects `$XDG_CONFIG_HOME`).
+
+| Variable | Default | Description |
+|---|---|---|
+| `AUR_QUERY_HELPER` | `yay` | AUR helper for package listing and previews |
+| `AUR_INSTALL_HELPER` | `paru` | AUR helper for installing and removing packages |
+
+Example `~/.config/pacfzf/config`:
+
+```sh
+AUR_QUERY_HELPER=paru
+AUR_INSTALL_HELPER=paru
+```
+
+Any helper compatible with standard yay/paru flags works (e.g. `yay`, `paru`, `trizen`).
+
 ## Dependencies
 
 - `fzf`

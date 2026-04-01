@@ -4,6 +4,13 @@
 
 VERSION="0.2.0"
 
+# ── config ─────────────────────────────────────────────────────────────────────
+AUR_QUERY_HELPER="yay"
+AUR_INSTALL_HELPER="paru"
+
+CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/pacfzf/config"
+[[ -f $CONFIG_FILE ]] && source "$CONFIG_FILE"
+
 _usage() {
 cat <<EOF
 pacfzf $VERSION — fzf-based interactive package manager for Arch Linux
@@ -91,24 +98,24 @@ fzf_args=(
 --multi
 --prompt 'AUR Install > '
 --header 'TAB: multi-select  ENTER: install  ESC: cancel  ALT-P: info  ALT-B: PKGBUILD'
---preview 'yay -Siia {1}'
+--preview "$AUR_QUERY_HELPER -Siia {1}"
 --preview-label ' AUR Package Info '
 --preview-label-pos 'bottom'
 --preview-window 'down:65%:wrap'
 --bind 'alt-p:toggle-preview'
 --bind 'alt-d:preview-half-page-down,alt-u:preview-half-page-up'
 --bind 'alt-k:preview-up,alt-j:preview-down'
---bind 'alt-b:change-preview:yay -Gpa {1} | tail -n +5'
+--bind "alt-b:change-preview:$AUR_QUERY_HELPER -Gpa {1} | tail -n +5"
 --bind 'alt-b:+change-preview-label: PKGBUILD '
---bind 'alt-p:change-preview:yay -Siia {1}'
+--bind "alt-p:change-preview:$AUR_QUERY_HELPER -Siia {1}"
 --bind 'alt-p:+change-preview-label: AUR Package Info '
 --color 'pointer:green,marker:green,header:italic'
 )
 
-pkg_names=$(yay -Slqa | fzf "${fzf_args[@]}")
+pkg_names=$($AUR_QUERY_HELPER -Slqa | fzf "${fzf_args[@]}")
 
 if [[ -n $pkg_names ]]; then
-echo "$pkg_names" | tr '\n' ' ' | xargs paru -S --noconfirm
+echo "$pkg_names" | tr '\n' ' ' | xargs $AUR_INSTALL_HELPER -S --noconfirm
 fi
 }
 
@@ -117,24 +124,24 @@ fzf_args=(
 --multi
 --prompt 'AUR Remove > '
 --header 'TAB: multi-select  ENTER: remove  ESC: cancel  ALT-P: info  ALT-B: PKGBUILD'
---preview 'yay -Qi {1}'
+--preview "$AUR_QUERY_HELPER -Qi {1}"
 --preview-label ' Package Info '
 --preview-label-pos 'bottom'
 --preview-window 'down:65%:wrap'
 --bind 'alt-p:toggle-preview'
 --bind 'alt-d:preview-half-page-down,alt-u:preview-half-page-up'
 --bind 'alt-k:preview-up,alt-j:preview-down'
---bind 'alt-b:change-preview:yay -Gpa {1} | tail -n +5'
+--bind "alt-b:change-preview:$AUR_QUERY_HELPER -Gpa {1} | tail -n +5"
 --bind 'alt-b:+change-preview-label: PKGBUILD '
---bind 'alt-p:change-preview:yay -Qi {1}'
+--bind "alt-p:change-preview:$AUR_QUERY_HELPER -Qi {1}"
 --bind 'alt-p:+change-preview-label: Package Info '
 --color 'pointer:red,marker:red,header:italic'
 )
 
-pkg_names=$(yay -Qqm | fzf "${fzf_args[@]}")
+pkg_names=$($AUR_QUERY_HELPER -Qqm | fzf "${fzf_args[@]}")
 
 if [[ -n $pkg_names ]]; then
-echo "$pkg_names" | tr '\n' ' ' | xargs paru -Rns --noconfirm
+echo "$pkg_names" | tr '\n' ' ' | xargs $AUR_INSTALL_HELPER -Rns --noconfirm
 fi
 }
 
