@@ -80,7 +80,7 @@ fzf_args=(
 --bind 'alt-p:toggle-preview'
 --bind 'alt-d:preview-half-page-down,alt-u:preview-half-page-up'
 --bind 'alt-k:preview-up,alt-j:preview-down'
---color 'pointer:green,marker:green,header:italic'
+--color 'pointer:green,marker:green,header:italic,prompt:green,hl:green,hl+:green'
 )
 
 pkg_names=$(pacman -Slq | fzf "${fzf_args[@]}")
@@ -104,7 +104,7 @@ fzf_args=(
 --bind 'alt-p:toggle-preview'
 --bind 'alt-d:preview-half-page-down,alt-u:preview-half-page-up'
 --bind 'alt-k:preview-up,alt-j:preview-down'
---color 'pointer:red,marker:red,header:italic'
+--color 'pointer:red,marker:red,header:italic,prompt:red,hl:red,hl+:red'
 )
 
 pkg_names=$(pacman -Qqn | fzf "${fzf_args[@]}")
@@ -132,7 +132,7 @@ fzf_args=(
 --bind 'alt-b:+change-preview-label: PKGBUILD '
 --bind "alt-p:change-preview:$AUR_QUERY_HELPER -Siia {1}"
 --bind 'alt-p:+change-preview-label: AUR Package Info '
---color 'pointer:green,marker:green,header:italic'
+--color 'pointer:green,marker:green,header:italic,prompt:green,hl:green,hl+:green'
 )
 
 pkg_names=$($AUR_QUERY_HELPER -Slqa | fzf "${fzf_args[@]}")
@@ -160,7 +160,7 @@ fzf_args=(
 --bind 'alt-b:+change-preview-label: PKGBUILD '
 --bind "alt-p:change-preview:$AUR_QUERY_HELPER -Qi {1}"
 --bind 'alt-p:+change-preview-label: Package Info '
---color 'pointer:red,marker:red,header:italic'
+--color 'pointer:red,marker:red,header:italic,prompt:red,hl:red,hl+:red'
 )
 
 pkg_names=$($AUR_QUERY_HELPER -Qqm | fzf "${fzf_args[@]}")
@@ -187,7 +187,7 @@ cmd_info() {
 		--bind 'alt-f:+change-preview-label: Installed Files '
 		--bind 'alt-p:change-preview:pacman -Qi {1}'
 		--bind 'alt-p:+change-preview-label: Package Info '
-		--color 'pointer:cyan,marker:cyan,header:italic'
+		--color 'pointer:cyan,marker:cyan,header:italic,prompt:cyan,hl:cyan,hl+:cyan'
 	)
 
 	pacman -Qq | fzf "${fzf_args[@]}" > /dev/null
@@ -204,11 +204,16 @@ cmd_history() {
 		--bind 'alt-p:toggle-preview'
 		--bind 'alt-d:preview-half-page-down,alt-u:preview-half-page-up'
 		--bind 'alt-k:preview-up,alt-j:preview-down'
-		--color 'pointer:yellow,marker:yellow,header:italic'
+		--ansi
+		--color 'pointer:yellow,marker:yellow,header:italic,prompt:yellow'
 		--no-multi
 	)
 
 	grep '\[ALPM\] \(installed\|removed\|upgraded\)' /var/log/pacman.log \
+		| sed \
+			-e 's/\(\[.*\] installed .*\)/\x1b[32m\1\x1b[0m/' \
+			-e 's/\(\[.*\] removed .*\)/\x1b[31m\1\x1b[0m/' \
+			-e 's/\(\[.*\] upgraded .*\)/\x1b[33m\1\x1b[0m/' \
 		| sed 's/\[ALPM\] //' \
 		| tac \
 		| fzf "${fzf_args[@]}" > /dev/null
