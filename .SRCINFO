@@ -1,6 +1,6 @@
 pkgbase = pacfzf
 	pkgdesc = fzf-based interactive package manager for Arch Linux
-	pkgver = 0.1.0
+	pkgver = 0.1.1
 	pkgrel = 1
 	url = https://github.com/mossbraxtin/pacfzf
 	arch = any
@@ -12,7 +12,7 @@ pkgbase = pacfzf
 	depends = curl
 	optdepends = paru: AUR support
 	optdepends = yay: AUR support (fallback)
-	source = pacfzf-0.1.0.tar.gz::https://github.com/mossbraxtin/pacfzf/archive/v0.1.0.tar.gz
-	b2sums = 6e094fe9a69708460244a4534f2976fa7ebe1d0bc090ac534037271124f8103d8e4bc75b71124c93975df6c34a0297f77f34767fbc21f29a3c1cd8c13ffe18fc
+	source = pacfzf-0.1.1.tar.gz::https://github.com/mossbraxtin/pacfzf/archive/v0.1.1.tar.gz
+	b2sums = 9cc9194cf7a6a77759077a9746936b85543618c4ff4ea089c348ea587008a651db6f640244c0f0045660e5196a26f85a01beb59d11bccb3ee61fdbdf46881218
 
 pkgname = pacfzf
