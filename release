@@ -1,0 +1,126 @@
+#!/bin/bash
+# release — bump version, tag, update checksums, and push to GitHub and AUR
+# Usage: ./release [--patch | --minor | --major | --version X.Y.Z]
+
+set -euo pipefail
+
+REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
+PKGBUILD="$REPO_DIR/PKGBUILD"
+SRCINFO="$REPO_DIR/.SRCINFO"
+SCRIPT="$REPO_DIR/pacfzf"
+GH_REMOTE="origin"
+AUR_REMOTE="aur"
+
+_usage() {
+	cat <<EOF
+Usage: ./release [options]
+
+Options:
+  --patch            Bump patch version (x.y.Z)  [default]
+  --minor            Bump minor version (x.Y.0)
+  --major            Bump major version (X.0.0)
+  --version X.Y.Z    Set an explicit version
+  -h, --help         Show this help message
+EOF
+}
+
+_current_version() {
+	grep -oP '(?<=pkgver=)\S+' "$PKGBUILD"
+}
+
+_bump_version() {
+	local ver="$1" part="$2"
+	IFS='.' read -r major minor patch <<< "$ver"
+	case "$part" in
+		major) echo "$((major + 1)).0.0" ;;
+		minor) echo "$major.$((minor + 1)).0" ;;
+		patch) echo "$major.$minor.$((patch + 1))" ;;
+	esac
+}
+
+_confirm() {
+	read -rp "$1 [y/N] " answer
+	[[ "${answer,,}" == "y" ]]
+}
+
+# ── parse args ─────────────────────────────────────────────────────────────────
+
+BUMP="patch"
+NEW_VER=""
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+		--patch)   BUMP="patch" ;;
+		--minor)   BUMP="minor" ;;
+		--major)   BUMP="major" ;;
+		--version) NEW_VER="$2"; shift ;;
+		-h|--help) _usage; exit 0 ;;
+		*) echo "release: unknown option '$1'. See './release --help'" >&2; exit 1 ;;
+	esac
+	shift
+done
+
+# ── determine new version ──────────────────────────────────────────────────────
+
+CURRENT_VER="$(_current_version)"
+
+if [[ -z "$NEW_VER" ]]; then
+	NEW_VER="$(_bump_version "$CURRENT_VER" "$BUMP")"
+fi
+
+echo "Current version : $CURRENT_VER"
+echo "New version     : $NEW_VER"
+echo ""
+
+_confirm "Proceed with release v$NEW_VER?" || { echo "Aborted."; exit 0; }
+
+# ── update version in files ────────────────────────────────────────────────────
+
+sed -i "s/VERSION=\"$CURRENT_VER\"/VERSION=\"$NEW_VER\"/" "$SCRIPT"
+sed -i "s/pkgver=$CURRENT_VER/pkgver=$NEW_VER/" "$PKGBUILD"
+sed -i "s/pkgver = $CURRENT_VER/pkgver = $NEW_VER/" "$SRCINFO"
+sed -i "s/v$CURRENT_VER/v$NEW_VER/g" "$PKGBUILD"
+sed -i "s/pacfzf-$CURRENT_VER/pacfzf-$NEW_VER/g" "$SRCINFO"
+sed -i "s/v$CURRENT_VER/v$NEW_VER/g" "$SRCINFO"
+
+echo "✓ Version bumped to $NEW_VER"
+
+# ── commit, tag, and push to GitHub ───────────────────────────────────────────
+
+cd "$REPO_DIR"
+git add pacfzf PKGBUILD .SRCINFO
+git commit -m "chore: bump version to $NEW_VER"
+git tag "v$NEW_VER"
+git push "$GH_REMOTE" main
+git push "$GH_REMOTE" "v$NEW_VER"
+
+echo "✓ Pushed tag v$NEW_VER to GitHub — waiting for tarball to be available..."
+sleep 5
+
+# ── fetch tarball and update checksum ─────────────────────────────────────────
+
+TARBALL_URL="https://github.com/mossbraxtin/pacfzf/archive/v$NEW_VER.tar.gz"
+TARBALL_TMP=$(mktemp /tmp/pacfzf-release.XXXXXX.tar.gz)
+trap "rm -f $TARBALL_TMP" EXIT
+
+echo "Downloading $TARBALL_URL..."
+curl -sL "$TARBALL_URL" -o "$TARBALL_TMP"
+
+NEW_SUM=$(b2sum "$TARBALL_TMP" | awk '{print $1}')
+echo "✓ b2sum: $NEW_SUM"
+
+OLD_SUM=$(grep -oP "(?<=b2sums=\(')[^']+" "$PKGBUILD")
+sed -i "s/$OLD_SUM/$NEW_SUM/" "$PKGBUILD"
+sed -i "s/$OLD_SUM/$NEW_SUM/" "$SRCINFO"
+
+echo "✓ Checksums updated"
+
+# ── final commit and push to GitHub + AUR ─────────────────────────────────────
+
+git add PKGBUILD .SRCINFO
+git commit -m "chore: update checksums for v$NEW_VER"
+git push "$GH_REMOTE" main
+git push "$AUR_REMOTE" main:master
+
+echo ""
+echo "✓ Release v$NEW_VER complete — pushed to GitHub and AUR"
