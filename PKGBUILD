@@ -9,7 +9,7 @@ license=('MIT')
 depends=('fzf' 'pacman' 'yay' 'paru')
 makedepends=('scdoc')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
-b2sums=('ec51cdca545945befadb3fcd2737dd879dc29e23ff67647375d9335616014dbbfb5980bbaca615df1ad200eca568958a1c4184e3e8f980280ecd1905ecb11bce')
+b2sums=('1596cc70d3fc2416ae3088acb1bc4c8300ae497bef1ae9015fb70f47bc6fa1221682b511c5166bedc31496b8efff18dedba5cbd002bf361bcd9c9db679d6afcf')
 
 build() {
 cd "$pkgname-$pkgver"
