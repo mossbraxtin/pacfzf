@@ -1,6 +1,6 @@
 # Maintainer: Dunky <braxtinmoss13@gmail.com>
 pkgname=pacfzf
-pkgver=0.2.0
+pkgver=0.3.0
 pkgrel=1
 pkgdesc="fzf-based interactive package manager for Arch Linux"
 arch=('any')

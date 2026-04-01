@@ -1,6 +1,6 @@
 pkgbase = pacfzf
 	pkgdesc = fzf-based interactive package manager for Arch Linux
-	pkgver = 0.2.0
+	pkgver = 0.3.0
 	pkgrel = 1
 	url = https://github.com/mossbraxtin/pacfzf
 	arch = any
@@ -10,7 +10,7 @@ pkgbase = pacfzf
 	depends = pacman
 	depends = yay
 	depends = paru
-	source = pacfzf-0.2.0.tar.gz::https://github.com/mossbraxtin/pacfzf/archive/v0.2.0.tar.gz
+	source = pacfzf-0.3.0.tar.gz::https://github.com/mossbraxtin/pacfzf/archive/v0.3.0.tar.gz
 	b2sums = 080e4b3fe5be315695bfe3b0108318b195aa159a089a6aa4d105d82bd78e2313b355e354b3bc2a044e5774c3f9d37c64f6ee83476e128049dc5d83d2bd99ef92
 
 pkgname = pacfzf
