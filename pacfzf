@@ -2,7 +2,7 @@
 # pacfzf — fzf-based interactive package manager for Arch Linux
 # Usage: pacfzf <command> [options]
 
-VERSION="0.1.3"
+VERSION="0.2.0"
 
 _usage() {
 cat <<EOF
