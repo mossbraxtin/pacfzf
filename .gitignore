@@ -1,6 +1,9 @@
 # compiled man page (built from pacfzf.1.scd at package time)
 pacfzf.1
 
+# local developer notes
+NOTES
+
 # pacman build artifacts
 *.pkg.tar.zst
 src/
