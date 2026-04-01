@@ -123,13 +123,18 @@ cmd_aur_install() {
 	local aur
 	aur=$(_check_aur_helper)
 
-	_aur_search() {
-		local q="${1:-}"
-		[[ -z "$q" ]] && return 0
-		local encoded
-		encoded=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$q")
-		curl -s "https://aur.archlinux.org/rpc/v5/search?by=name-desc&arg=${encoded}" \
-			| python3 -c "
+	# Write search logic to a temp script — fzf reload runs via $SHELL which
+	# may not be bash, so exported bash functions are unreliable.
+	local tmpscript
+	tmpscript=$(mktemp /tmp/pacfzf-search.XXXXXX)
+	trap "rm -f $tmpscript" RETURN
+	cat > "$tmpscript" << 'SEARCH'
+#!/usr/bin/env bash
+q="${1:-}"
+[[ -z "$q" ]] && exit 0
+encoded=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$q")
+curl -s "https://aur.archlinux.org/rpc/v5/search?by=name-desc&arg=${encoded}" \
+	| python3 -c "
 import sys, json
 d = json.load(sys.stdin)
 pkgs = sorted(d.get('results', []), key=lambda p: (-p.get('Popularity', 0)))
@@ -137,16 +142,16 @@ for p in pkgs:
     desc = (p.get('Description') or '').replace('\n', ' ')
     print(f\"{p['Name']}\t{desc}\")
 "
-	}
-	export -f _aur_search
+SEARCH
+	chmod +x "$tmpscript"
 
 	local fzf_args=(
 		--multi
 		--prompt 'AUR Install > '
 		--header 'Type to search AUR  TAB: multi-select  ENTER: install  ESC: cancel  ALT-P: info  ALT-B: PKGBUILD'
 		--disabled
-		--bind 'change:reload:_aur_search {q}'
-		--preview "${aur} -Si {1}"
+		--bind "change:reload:$tmpscript {q}"
+		--preview "${aur} -Si {1} 2>/dev/null"
 		--preview-label ' AUR Package Info '
 		--preview-label-pos 'bottom'
 		--preview-window 'down:65%:wrap'
@@ -164,7 +169,7 @@ for p in pkgs:
 	)
 
 	local pkg_names
-	pkg_names=$(echo "" | fzf "${fzf_args[@]}" | cut -f1) || return 0
+	pkg_names=$(fzf "${fzf_args[@]}" < /dev/null | cut -f1) || return 0
 
 	[[ -n "$pkg_names" ]] || return 0
 	echo "$pkg_names" | tr '\n' ' ' | xargs "$aur" -S
