@@ -2,7 +2,7 @@
 # pacfzf — fzf-based interactive package manager for Arch Linux
 # Usage: pacfzf <command> [options]
 
-VERSION="0.3.0"
+VERSION="0.4.0"
 
 # ── config ─────────────────────────────────────────────────────────────────────
 AUR_QUERY_HELPER="yay"
