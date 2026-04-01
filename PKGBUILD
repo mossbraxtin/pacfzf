@@ -6,11 +6,7 @@ pkgdesc="fzf-based interactive package manager for Arch Linux"
 arch=('any')
 url="https://github.com/mossbraxtin/pacfzf"
 license=('MIT')
-depends=('fzf' 'pacman' 'python' 'curl')
-optdepends=(
-'paru: AUR support'
-'yay: AUR support (fallback)'
-)
+depends=('fzf' 'pacman' 'yay' 'paru')
 makedepends=('scdoc')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
 b2sums=('9cc9194cf7a6a77759077a9746936b85543618c4ff4ea089c348ea587008a651db6f640244c0f0045660e5196a26f85a01beb59d11bccb3ee61fdbdf46881218')

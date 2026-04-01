@@ -8,10 +8,8 @@ pkgbase = pacfzf
 	makedepends = scdoc
 	depends = fzf
 	depends = pacman
-	depends = python
-	depends = curl
-	optdepends = paru: AUR support
-	optdepends = yay: AUR support (fallback)
+	depends = yay
+	depends = paru
 	source = pacfzf-0.1.1.tar.gz::https://github.com/mossbraxtin/pacfzf/archive/v0.1.1.tar.gz
 	b2sums = 9cc9194cf7a6a77759077a9746936b85543618c4ff4ea089c348ea587008a651db6f640244c0f0045660e5196a26f85a01beb59d11bccb3ee61fdbdf46881218
 
