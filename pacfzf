@@ -11,6 +11,17 @@ AUR_INSTALL_HELPER="paru"
 CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/pacfzf/config"
 [[ -f $CONFIG_FILE ]] && source "$CONFIG_FILE"
 
+_confirm() {
+local action="$1" pkgs="$2"
+local count
+count=$(echo "$pkgs" | wc -w)
+echo -e "\n\033[1m${action} (${count}):\033[0m"
+echo "$pkgs" | tr ' ' '\n' | sed 's/^/  /'
+echo
+read -r -p "Proceed? [y/N] " reply
+[[ $reply =~ ^[Yy]$ ]]
+}
+
 _usage() {
 cat <<EOF
 pacfzf $VERSION — fzf-based interactive package manager for Arch Linux
@@ -75,6 +86,8 @@ fzf_args=(
 pkg_names=$(pacman -Slq | fzf "${fzf_args[@]}")
 
 if [[ -n $pkg_names ]]; then
+pkg_list=$(echo "$pkg_names" | tr '\n' ' ')
+_confirm "Install" "$pkg_list" || exit 0
 echo "$pkg_names" | tr '\n' ' ' | xargs sudo pacman -S --noconfirm
 fi
 }
@@ -97,6 +110,8 @@ fzf_args=(
 pkg_names=$(pacman -Qqn | fzf "${fzf_args[@]}")
 
 if [[ -n $pkg_names ]]; then
+pkg_list=$(echo "$pkg_names" | tr '\n' ' ')
+_confirm "Remove" "$pkg_list" || exit 0
 echo "$pkg_names" | tr '\n' ' ' | xargs sudo pacman -Rns --noconfirm
 fi
 }
@@ -123,6 +138,8 @@ fzf_args=(
 pkg_names=$($AUR_QUERY_HELPER -Slqa | fzf "${fzf_args[@]}")
 
 if [[ -n $pkg_names ]]; then
+pkg_list=$(echo "$pkg_names" | tr '\n' ' ')
+_confirm "AUR Install" "$pkg_list" || exit 0
 echo "$pkg_names" | tr '\n' ' ' | xargs $AUR_INSTALL_HELPER -S --noconfirm
 fi
 }
@@ -149,6 +166,8 @@ fzf_args=(
 pkg_names=$($AUR_QUERY_HELPER -Qqm | fzf "${fzf_args[@]}")
 
 if [[ -n $pkg_names ]]; then
+pkg_list=$(echo "$pkg_names" | tr '\n' ' ')
+_confirm "AUR Remove" "$pkg_list" || exit 0
 echo "$pkg_names" | tr '\n' ' ' | xargs $AUR_INSTALL_HELPER -Rns --noconfirm
 fi
 }
