@@ -133,16 +133,16 @@ Browse recent package transactions:
 
 # FILES
 
-*~/.config/pacfzf/config*
+_~/.config/pacfzf/config_
 	Optional shell config file. Sourced at startup if present.
 
-*/usr/share/bash-completion/completions/pacfzf*
+_/usr/share/bash-completion/completions/pacfzf_
 	Bash tab-completions.
 
-*/usr/share/zsh/site-functions/_pacfzf*
+_/usr/share/zsh/site-functions/_pacfzf_
 	Zsh tab-completions.
 
-*/usr/share/fish/vendor_completions.d/pacfzf.fish*
+_/usr/share/fish/vendor_completions.d/pacfzf.fish_
 	Fish tab-completions.
 
 # BUGS
