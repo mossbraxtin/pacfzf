@@ -2,7 +2,7 @@
 # pacfzf — fzf-based interactive package manager for Arch Linux
 # Usage: pacfzf <command> [options]
 
-VERSION="0.1.2"
+VERSION="0.1.3"
 
 _usage() {
 cat <<EOF
@@ -16,6 +16,8 @@ Commands:
   remove          Browse and remove installed packages from official repositories
   aur-install     Search and install packages from the AUR
   aur-remove      Browse and remove installed AUR/foreign packages
+  info            Browse installed packages and view package details
+  history         Browse the pacman transaction log
 
 Options:
   -h, --help      Show this help message
@@ -135,6 +137,48 @@ echo "$pkg_names" | tr '\n' ' ' | xargs paru -Rns --noconfirm
 fi
 }
 
+cmd_info() {
+	fzf_args=(
+		--prompt 'Info > '
+		--header 'ALT-F: files  ESC: cancel  ALT-P: toggle preview'
+		--preview 'pacman -Qi {1}'
+		--preview-label ' Package Info '
+		--preview-label-pos 'bottom'
+		--preview-window 'down:65%:wrap'
+		--bind 'alt-p:toggle-preview'
+		--bind 'alt-d:preview-half-page-down,alt-u:preview-half-page-up'
+		--bind 'alt-k:preview-up,alt-j:preview-down'
+		--bind 'alt-f:change-preview:pacman -Ql {1}'
+		--bind 'alt-f:+change-preview-label: Installed Files '
+		--bind 'alt-p:change-preview:pacman -Qi {1}'
+		--bind 'alt-p:+change-preview-label: Package Info '
+		--color 'pointer:cyan,marker:cyan,header:italic'
+	)
+
+	pacman -Qq | fzf "${fzf_args[@]}" > /dev/null
+}
+
+cmd_history() {
+	fzf_args=(
+		--prompt 'History > '
+		--header 'Filter by typing  ESC: cancel  ALT-P: toggle preview'
+		--preview 'echo {}'
+		--preview-label ' Entry Detail '
+		--preview-label-pos 'bottom'
+		--preview-window 'down:25%:wrap'
+		--bind 'alt-p:toggle-preview'
+		--bind 'alt-d:preview-half-page-down,alt-u:preview-half-page-up'
+		--bind 'alt-k:preview-up,alt-j:preview-down'
+		--color 'pointer:yellow,marker:yellow,header:italic'
+		--no-multi
+	)
+
+	grep '\[ALPM\] \(installed\|removed\|upgraded\)' /var/log/pacman.log \
+		| sed 's/\[ALPM\] //' \
+		| tac \
+		| fzf "${fzf_args[@]}" > /dev/null
+}
+
 # ── entry point ────────────────────────────────────────────────────────────────
 
 case "${1:-}" in
@@ -142,6 +186,8 @@ install)       cmd_install ;;
 remove)        cmd_remove ;;
 aur-install)   cmd_aur_install ;;
 aur-remove)    cmd_aur_remove ;;
+info)          cmd_info ;;
+history)       cmd_history ;;
 -h|--help)     _usage ;;
 -V|--version)  echo "pacfzf $VERSION" ;;
 "")
