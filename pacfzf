@@ -1,0 +1,221 @@
+#!/usr/bin/env bash
+# pacfzf — fzf-based interactive package manager for Arch Linux
+# Usage: pacfzf <command> [options]
+
+set -euo pipefail
+
+VERSION="0.1.0"
+
+_usage() {
+	cat <<EOF
+pacfzf $VERSION — fzf-based interactive package manager for Arch Linux
+
+Usage:
+  pacfzf <command>
+
+Commands:
+  install         Browse and install packages from official repositories
+  remove          Browse and remove installed packages from official repositories
+  aur-install     Search and install packages from the AUR
+  aur-remove      Browse and remove installed AUR/foreign packages
+
+Options:
+  -h, --help      Show this help message
+  -V, --version   Show version information
+
+Key bindings (all commands):
+  TAB             Multi-select a package
+  ENTER           Confirm selection and proceed
+  ESC             Cancel
+  ALT-P           Toggle preview pane
+  ALT-B           Toggle PKGBUILD view (aur-install, aur-remove only)
+  ALT-D / ALT-U   Scroll preview down/up (half page)
+  ALT-J / ALT-K   Scroll preview line by line
+
+Examples:
+  pacfzf install
+  pacfzf aur-install
+  pacfzf remove
+
+See pacfzf(1) for full documentation.
+EOF
+}
+
+_check_dep() {
+	if ! command -v "$1" &>/dev/null; then
+		echo "pacfzf: required dependency '$1' not found" >&2
+		exit 1
+	fi
+}
+
+_check_aur_helper() {
+	if command -v paru &>/dev/null; then
+		echo paru
+	elif command -v yay &>/dev/null; then
+		echo yay
+	else
+		echo "pacfzf: aur commands require paru or yay to be installed" >&2
+		return 1
+	fi
+}
+
+_common_fzf_binds=(
+	--bind 'alt-p:toggle-preview'
+	--bind 'alt-d:preview-half-page-down'
+	--bind 'alt-u:preview-half-page-up'
+	--bind 'alt-k:preview-up'
+	--bind 'alt-j:preview-down'
+)
+
+cmd_install() {
+	_check_dep fzf
+	_check_dep pacman
+
+	local fzf_args=(
+		--multi
+		--prompt 'Install > '
+		--header 'TAB: multi-select  ENTER: install  ESC: cancel  ALT-P: toggle preview'
+		--preview 'pacman -Sii {1}'
+		--preview-label ' Package Info '
+		--preview-label-pos 'bottom'
+		--preview-window 'down:65%:wrap'
+		"${_common_fzf_binds[@]}"
+		--color 'pointer:green,marker:green,header:italic'
+	)
+
+	local pkg_names
+	pkg_names=$(comm -23 \
+		<(pacman -Slq | sort) \
+		<(pacman -Qq | sort) \
+		| fzf "${fzf_args[@]}") || return 0
+
+	[[ -n "$pkg_names" ]] || return 0
+	echo "$pkg_names" | tr '\n' ' ' | xargs sudo pacman -S
+}
+
+cmd_remove() {
+	_check_dep fzf
+	_check_dep pacman
+
+	local fzf_args=(
+		--multi
+		--prompt 'Remove > '
+		--header 'TAB: multi-select  ENTER: remove  ESC: cancel  ALT-P: toggle preview'
+		--preview 'pacman -Qi {1}'
+		--preview-label ' Package Info '
+		--preview-label-pos 'bottom'
+		--preview-window 'down:65%:wrap'
+		"${_common_fzf_binds[@]}"
+		--color 'pointer:red,marker:red,header:italic'
+	)
+
+	local pkg_names
+	pkg_names=$(pacman -Qqn | fzf "${fzf_args[@]}") || return 0
+
+	[[ -n "$pkg_names" ]] || return 0
+	echo "$pkg_names" | tr '\n' ' ' | xargs sudo pacman -Rns
+}
+
+cmd_aur_install() {
+	_check_dep fzf
+	_check_dep curl
+	_check_dep python3
+	local aur
+	aur=$(_check_aur_helper)
+
+	_aur_search() {
+		local q="${1:-}"
+		[[ -z "$q" ]] && return 0
+		local encoded
+		encoded=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$q")
+		curl -s "https://aur.archlinux.org/rpc/v5/search?by=name-desc&arg=${encoded}" \
+			| python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+pkgs = sorted(d.get('results', []), key=lambda p: (-p.get('Popularity', 0)))
+for p in pkgs:
+    desc = (p.get('Description') or '').replace('\n', ' ')
+    print(f\"{p['Name']}\t{desc}\")
+"
+	}
+	export -f _aur_search
+
+	local fzf_args=(
+		--multi
+		--prompt 'AUR Install > '
+		--header 'Type to search AUR  TAB: multi-select  ENTER: install  ESC: cancel  ALT-P: info  ALT-B: PKGBUILD'
+		--disabled
+		--bind 'change:reload:_aur_search {q}'
+		--preview "${aur} -Si {1}"
+		--preview-label ' AUR Package Info '
+		--preview-label-pos 'bottom'
+		--preview-window 'down:65%:wrap'
+		--bind "alt-b:change-preview:${aur} -Gpa {1} 2>/dev/null | tail -n +5"
+		--bind 'alt-b:+change-preview-label: PKGBUILD '
+		--bind "alt-p:change-preview:${aur} -Si {1}"
+		--bind 'alt-p:+change-preview-label: AUR Package Info '
+		--bind 'alt-d:preview-half-page-down'
+		--bind 'alt-u:preview-half-page-up'
+		--bind 'alt-k:preview-up'
+		--bind 'alt-j:preview-down'
+		--with-nth 1
+		--delimiter $'\t'
+		--color 'pointer:green,marker:green,header:italic'
+	)
+
+	local pkg_names
+	pkg_names=$(echo "" | fzf "${fzf_args[@]}" | cut -f1) || return 0
+
+	[[ -n "$pkg_names" ]] || return 0
+	echo "$pkg_names" | tr '\n' ' ' | xargs "$aur" -S
+}
+
+cmd_aur_remove() {
+	_check_dep fzf
+	local aur
+	aur=$(_check_aur_helper)
+
+	local fzf_args=(
+		--multi
+		--prompt 'AUR Remove > '
+		--header 'TAB: multi-select  ENTER: remove  ESC: cancel  ALT-P: info  ALT-B: PKGBUILD'
+		--preview 'pacman -Qi {1}'
+		--preview-label ' Package Info '
+		--preview-label-pos 'bottom'
+		--preview-window 'down:65%:wrap'
+		--bind "alt-b:change-preview:${aur} -Gpa {1} 2>/dev/null | tail -n +5"
+		--bind 'alt-b:+change-preview-label: PKGBUILD '
+		--bind "alt-p:change-preview:pacman -Qi {1}"
+		--bind 'alt-p:+change-preview-label: Package Info '
+		--bind 'alt-d:preview-half-page-down'
+		--bind 'alt-u:preview-half-page-up'
+		--bind 'alt-k:preview-up'
+		--bind 'alt-j:preview-down'
+		--color 'pointer:red,marker:red,header:italic'
+	)
+
+	local pkg_names
+	pkg_names=$(pacman -Qqm | fzf "${fzf_args[@]}") || return 0
+
+	[[ -n "$pkg_names" ]] || return 0
+	echo "$pkg_names" | tr '\n' ' ' | xargs "$aur" -Rns
+}
+
+# ── entry point ────────────────────────────────────────────────────────────────
+
+case "${1:-}" in
+	install)       cmd_install ;;
+	remove)        cmd_remove ;;
+	aur-install)   cmd_aur_install ;;
+	aur-remove)    cmd_aur_remove ;;
+	-h|--help)     _usage ;;
+	-V|--version)  echo "pacfzf $VERSION" ;;
+	"")
+		echo "pacfzf: no command given. See 'pacfzf --help'" >&2
+		exit 1
+		;;
+	*)
+		echo "pacfzf: unknown command '$1'. See 'pacfzf --help'" >&2
+		exit 1
+		;;
+esac
