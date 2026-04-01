@@ -8,13 +8,23 @@ An fzf-based interactive package manager for Arch Linux.
 |---|---|
 | `pacfzf install` | Browse and install packages from official repositories |
 | `pacfzf remove` | Browse and remove installed packages from official repositories |
-| `pacfzf aur-install` | Search and install packages from the AUR |
+| `pacfzf aur-install` | Browse and install packages from the AUR |
 | `pacfzf aur-remove` | Browse and remove installed AUR/foreign packages |
+| `pacfzf info` | Browse installed packages and inspect details/files |
+| `pacfzf history` | Browse the pacman transaction log (most recent first) |
 
 ## Usage
 
 ```
 pacfzf <command>
+
+Commands:
+  install         Browse and install packages from official repositories
+  remove          Browse and remove installed packages from official repositories
+  aur-install     Browse and install packages from the AUR
+  aur-remove      Browse and remove installed AUR/foreign packages
+  info            Browse installed packages and view package details
+  history         Browse the pacman transaction log (most recent first)
 
 Options:
   -h, --help      Show help
@@ -30,6 +40,7 @@ Options:
 | `ESC` | Cancel |
 | `ALT-P` | Toggle preview pane |
 | `ALT-B` | Toggle PKGBUILD view (`aur-install`, `aur-remove` only) |
+| `ALT-F` | Toggle installed files view (`info` only) |
 | `ALT-D / ALT-U` | Scroll preview down/up (half page) |
 | `ALT-J / ALT-K` | Scroll preview line by line |
 
@@ -37,8 +48,8 @@ Options:
 
 - `fzf`
 - `pacman`
-- `paru` or `yay` (required for `aur-install` and `aur-remove`)
-- `python3`, `curl` (used for AUR RPC search in `aur-install`)
+- `yay` (queries and AUR browsing)
+- `paru` (AUR installs and removes)
 
 ## Installation
 

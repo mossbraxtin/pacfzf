@@ -10,33 +10,44 @@ pacfzf - fzf-based interactive package manager for Arch Linux
 
 # DESCRIPTION
 
-pacfzf provides four interactive fzf-based commands for browsing, installing,
-and removing packages from both official Arch Linux repositories and the AUR.
+pacfzf provides interactive fzf-based commands for browsing, installing,
+removing, and inspecting packages from both official Arch Linux repositories
+and the AUR.
 
 # COMMANDS
 
 *install*
 	Browse all available official-repository packages not yet installed.
 	Preview shows full *pacman -Sii* output.
-	Installs selected packages with *sudo pacman -S*.
+	Installs selected packages with *sudo pacman -S --noconfirm*.
 
 *remove*
 	Browse all installed packages from official repositories.
 	Preview shows *pacman -Qi* output.
-	Removes selected packages with *sudo pacman -Rns*.
+	Removes selected packages with *sudo pacman -Rns --noconfirm*.
 
 *aur-install*
-	Search the AUR interactively via the AUR RPC API.
-	Type a query to load results sorted by popularity.
-	Preview shows *paru -Si* (or *yay -Si*) output.
+	Browse all available AUR packages via *yay -Slqa*.
+	Preview shows *yay -Siia* output.
 	Press *ALT-B* to toggle the PKGBUILD preview.
-	Installs selected packages with *paru -S* (or *yay -S*).
+	Installs selected packages with *paru -S --noconfirm*.
 
 *aur-remove*
 	Browse all installed foreign (AUR) packages.
-	Preview shows *pacman -Qi* output.
+	Preview shows *yay -Qi* output.
 	Press *ALT-B* to toggle the PKGBUILD preview.
-	Removes selected packages with *paru -Rns* (or *yay -Rns*).
+	Removes selected packages with *paru -Rns --noconfirm*.
+
+*info*
+	Browse all installed packages and inspect them interactively.
+	Preview shows *pacman -Qi* output.
+	Press *ALT-F* to toggle a list of installed files (*pacman -Ql*).
+	Read-only — no install or remove action is performed.
+
+*history*
+	Browse the pacman transaction log in reverse chronological order.
+	Shows all *installed*, *removed*, and *upgraded* events from
+	*/var/log/pacman.log*. Fully fuzzy-searchable.
 
 # OPTIONS
 
@@ -60,6 +71,8 @@ The following key bindings apply across all commands:
 :< Toggle the preview pane
 |[ ALT-B
 :< Toggle PKGBUILD view (aur-install and aur-remove only)
+|[ ALT-F
+:< Toggle installed files view (info only)
 |[ ALT-D
 :< Scroll preview down half a page
 |[ ALT-U
@@ -71,9 +84,7 @@ The following key bindings apply across all commands:
 
 # DEPENDENCIES
 
-*fzf*(1), *pacman*(8), *curl*(1), *python3*(1)
-
-For AUR commands: *paru* or *yay* must be installed.
+*fzf*(1), *pacman*(8), *yay*(8), *paru*(8)
 
 # EXAMPLES
 
@@ -89,6 +100,14 @@ Search for and install an AUR package:
 
 	pacfzf aur-install
 
+Inspect an installed package and its files:
+
+	pacfzf info
+
+Browse recent package transactions:
+
+	pacfzf history
+
 # BUGS
 
 Report bugs at: https://github.com/mossbraxtin/pacfzf/issues
@@ -99,4 +118,4 @@ Maintained by Dunky <braxtinmoss13@gmail.com>.
 
 # SEE ALSO
 
-*pacman*(8), *fzf*(1), *paru*(8)
+*pacman*(8), *fzf*(1), *yay*(8), *paru*(8)
