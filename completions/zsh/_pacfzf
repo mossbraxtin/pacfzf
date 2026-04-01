@@ -1,0 +1,25 @@
+#compdef pacfzf
+
+_pacfzf() {
+    local -a commands
+    commands=(
+        'install:Browse and install packages from official repositories'
+        'remove:Browse and remove installed packages from official repositories'
+        'aur-install:Browse and install packages from the AUR'
+        'aur-remove:Browse and remove installed AUR/foreign packages'
+        'info:Browse installed packages and view package details'
+        'history:Browse the pacman transaction log (most recent first)'
+    )
+
+    _arguments -C \
+        '(-h --help)'{-h,--help}'[show help message]' \
+        '(-V --version)'{-V,--version}'[show version information]' \
+        '1: :->command' \
+        && return
+
+    case $state in
+        command) _describe 'command' commands ;;
+    esac
+}
+
+_pacfzf

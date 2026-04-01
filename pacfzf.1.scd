@@ -131,6 +131,20 @@ Browse recent package transactions:
 
 	pacfzf history
 
+# FILES
+
+*~/.config/pacfzf/config*
+	Optional shell config file. Sourced at startup if present.
+
+*/usr/share/bash-completion/completions/pacfzf*
+	Bash tab-completions.
+
+*/usr/share/zsh/site-functions/_pacfzf*
+	Zsh tab-completions.
+
+*/usr/share/fish/vendor_completions.d/pacfzf.fish*
+	Fish tab-completions.
+
 # BUGS
 
 Report bugs at: https://github.com/mossbraxtin/pacfzf/issues

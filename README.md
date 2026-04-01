@@ -87,4 +87,7 @@ Requires [scdoc](https://sr.ht/~sircmpwn/scdoc/) to compile the man page:
 scdoc < pacfzf.1.scd > pacfzf.1
 sudo install -Dm755 pacfzf /usr/bin/pacfzf
 sudo install -Dm644 pacfzf.1 /usr/share/man/man1/pacfzf.1
+sudo install -Dm644 completions/bash/pacfzf /usr/share/bash-completion/completions/pacfzf
+sudo install -Dm644 completions/zsh/_pacfzf /usr/share/zsh/site-functions/_pacfzf
+sudo install -Dm644 completions/fish/pacfzf.fish /usr/share/fish/vendor_completions.d/pacfzf.fish
 ```
